@@ -1,0 +1,109 @@
+services:
+  # ---------- MISP Backend: MariaDB (lightweight) ----------
+  misp-db:
+    image: mariadb:10.11
+    container_name: cti-misp-db
+    restart: unless-stopped
+    command: --max-connections=200 --innodb-buffer-pool-size=256M
+    environment:
+      MYSQL_ROOT_PASSWORD: "ChangeMeRoot123!"
+      MYSQL_DATABASE: "misp"
+      MYSQL_USER: "misp"
+      MYSQL_PASSWORD: "ChangeMeMisp123!"  # alpha-num only (MISP requirement)
+    volumes:
+      - misp-mysql:/var/lib/mysql
+    networks:
+      - cti-lab
+    healthcheck:
+      test: ["CMD", "mariadb-admin", "ping", "-h", "localhost", "-u", "misp", "-pChangeMeMisp123!"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+
+  # ---------- MISP Backend: Redis (lightweight) ----------
+  misp-redis:
+    image: redis:7-alpine
+    container_name: cti-misp-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    volumes:
+      - misp-redis:/data
+    networks:
+      - cti-lab
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ---------- MISP Core (IOC management) ----------
+  # Lightweight modular build. No OpenCTI / Elasticsearch.
+  misp:
+    image: coolacid/misp-docker:core-latest
+    container_name: cti-misp
+    restart: unless-stopped
+    depends_on:
+      misp-db:
+        condition: service_healthy
+      misp-redis:
+        condition: service_healthy
+    ports:
+      - "8081:80"   # HTTP  -> http://localhost:8081 (8080 taken by MiniTool on this host)
+      - "8443:443"  # HTTPS -> https://localhost:8443 (self-signed, expect warning)
+    volumes:
+      - misp-files:/var/www/MISP/app/files
+      - misp-config:/var/www/MISP/app/Config
+      - misp-logs:/var/www/MISP/app/tmp/logs
+    environment:
+      - "BASEURL=https://localhost:8443"
+      - "REDIS_FQDN=misp-redis"
+      - "MYSQL_HOST=misp-db"
+      - "MYSQL_USER=misp"
+      - "MYSQL_PASSWORD=ChangeMeMisp123!"
+      - "MYSQL_DATABASE=misp"
+      - "INIT=true"        # first run only: imports DB schema
+      - "CRON_USER_ID=1"
+      - "WORKERS=1"        # keep RAM low (default would spawn 5+ workers)
+      - "PHP_MEMORY=512M"
+    networks:
+      - cti-lab
+
+  # ---------- Jupyter Lab for CTI Python (STIX/TAXII/MITRE) ----------
+  jupyter:
+    build:
+      context: .
+      dockerfile: Dockerfile.jupyter
+    container_name: cti-jupyter
+    restart: unless-stopped
+    ports:
+      - "8888:8888"
+    volumes:
+      - ./notebooks:/home/jovyan/work
+    environment:
+      - "JUPYTER_TOKEN=ctilab"
+      - "JUPYTER_PASSWORD=ctilab"
+      - "GRANT_SUDO=no"
+    networks:
+      - cti-lab
+
+  # ---------- CyberChef (quick decode / deobfuscate) ----------
+  cyberchef:
+    image: ghcr.io/gchq/cyberchef:latest
+    container_name: cti-cyberchef
+    restart: unless-stopped
+    ports:
+      - "8000:8080"  # v11+ listens on 8080 inside container -> http://localhost:8000
+    networks:
+      - cti-lab
+
+networks:
+  cti-lab:
+    name: cti-lab
+    driver: bridge
+
+volumes:
+  misp-mysql:
+  misp-redis:
+  misp-files:
+  misp-config:
+  misp-logs:

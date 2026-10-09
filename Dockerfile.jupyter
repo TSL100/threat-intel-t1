@@ -1,0 +1,21 @@
+# Lightweight Jupyter for CTI work
+FROM jupyter/base-notebook:latest
+
+# Install CTI libraries pre-baked (no pip install needed at runtime)
+# stix2: create/parse STIX 2.1 bundles
+# taxii2-client: query TAXII feeds / MITRE
+# pycti: OpenCTI client lib (useful even without OpenCTI server, for parsing)
+# pandas/requests: data handling + MISP API / MITRE CTI GitHub
+RUN pip install --no-cache-dir \
+    stix2==3.0.1 \
+    taxii2-client==2.3.0 \
+    pycti==6.6.2 \
+    pandas==2.2.3 \
+    requests==2.32.3 \
+    jupyterlab==4.2.5
+
+# Default work dir mounted from ./notebooks
+WORKDIR /home/jovyan/work
+
+# Jupyter token is set via docker-compose env JUPYTER_TOKEN
+EXPOSE 8888

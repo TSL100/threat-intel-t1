@@ -1,0 +1,16 @@
+# Lab cache / large MITRE file (auto-downloaded by test_cti_lab.py)
+notebooks/enterprise-attack.json
+
+# Python
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+
+# Env / secrets - never push real keys
+.env
+*.env
+
+# Docker volumes / local data
+misp-data/

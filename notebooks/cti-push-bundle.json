@@ -1,0 +1,68 @@
+{
+    "type": "bundle",
+    "id": "bundle--d5164b1a-c771-4c87-a27d-cbf2d7b64362",
+    "objects": [
+        {
+            "type": "indicator",
+            "spec_version": "2.1",
+            "id": "indicator--c0cce815-a07e-4bf7-acbb-d08e0dc6bfd5",
+            "created": "2026-10-08T21:25:59.336325Z",
+            "modified": "2026-10-08T21:25:59.336325Z",
+            "name": "Malicious IP 203.0.113.45",
+            "pattern": "[ipv4-addr:value = '203.0.113.45']",
+            "pattern_type": "stix",
+            "pattern_version": "2.1",
+            "valid_from": "2026-01-01T00:00:00Z",
+            "labels": [
+                "malicious-activity"
+            ]
+        },
+        {
+            "type": "indicator",
+            "spec_version": "2.1",
+            "id": "indicator--d266ac28-bb4a-48f9-898c-13b5473d6c3a",
+            "created": "2026-10-08T21:25:59.347796Z",
+            "modified": "2026-10-08T21:25:59.347796Z",
+            "name": "Ransomware payload hash",
+            "pattern": "[file:hashes.'SHA-256' = '44d88612fea8a8f36de82e1278abb02f36f5ba38d69b3a3406f2323ea3a3c8b8']",
+            "pattern_type": "stix",
+            "pattern_version": "2.1",
+            "valid_from": "2026-01-01T00:00:00Z",
+            "labels": [
+                "malicious-activity"
+            ]
+        },
+        {
+            "type": "malware",
+            "spec_version": "2.1",
+            "id": "malware--87b40ce7-9415-4829-9951-0e5d60ccfd41",
+            "created": "2026-10-08T21:25:59.335895Z",
+            "modified": "2026-10-08T21:25:59.335895Z",
+            "name": "Lab-Test-Ransomware",
+            "malware_types": [
+                "ransomware"
+            ],
+            "is_family": false
+        },
+        {
+            "type": "relationship",
+            "spec_version": "2.1",
+            "id": "relationship--9c32979b-85c1-44be-8b6a-99b5dde552a5",
+            "created": "2026-10-08T21:25:59.352144Z",
+            "modified": "2026-10-08T21:25:59.352144Z",
+            "relationship_type": "indicates",
+            "source_ref": "indicator--c0cce815-a07e-4bf7-acbb-d08e0dc6bfd5",
+            "target_ref": "malware--87b40ce7-9415-4829-9951-0e5d60ccfd41"
+        },
+        {
+            "type": "relationship",
+            "spec_version": "2.1",
+            "id": "relationship--9b372faa-bbe6-4cb9-9528-8988044c0185",
+            "created": "2026-10-08T21:25:59.352765Z",
+            "modified": "2026-10-08T21:25:59.352765Z",
+            "relationship_type": "indicates",
+            "source_ref": "indicator--d266ac28-bb4a-48f9-898c-13b5473d6c3a",
+            "target_ref": "malware--87b40ce7-9415-4829-9951-0e5d60ccfd41"
+        }
+    ]
+}
