@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="assets/logo.svg" width="100%" alt="threat-intel-t1 logo">
+</p>
+
 # threat-intel-t1 — CTI Lab Level 0
 
 Lightweight Cyber Threat Intelligence lab with Docker.
